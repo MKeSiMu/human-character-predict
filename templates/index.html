@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Image Classifier</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <h1>Predict Human Character from a Facial Image</h1>
+    <div class="container index-container">
+        <div class="left">
+
+            <img src="{{ url_for('static', filename='images/face_picture.jpeg') }}" alt="Uploaded Image">
+            <h2>Upload an Image for Analysis</h2>
+            <H5>Supported formats .png, .jpg, .jpeg .gif</H5>
+            {% with messages = get_flashed_messages(with_categories=True) %}
+                {% if messages %}
+                    <div class="flash">
+                        {% for category, message in messages %}
+                            <div class="flash-{{ category }}">
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
+
+            <form method="POST" enctype="multipart/form-data">
+                <input type="file" name="file">
+                <input type="submit" value="Upload">
+            </form>
+        </div>
+        <div class="right">
+            <div class="description">
+                <h2>Welcome to Our Platform</h2>
+                <p>Discover the potential of advanced machine learning as we analyze facial images to predict human character traits. Our cutting-edge technology provides insights into personality characteristics based on facial features.</p>
+
+                <h2>How It Works</h2>
+                <ol style="text-align: left;">
+                    <li><strong>Upload an Image:</strong> Submit a clear, front-facing image of a person.</li>
+                    <li><strong>Image Analysis:</strong> Our model processes the image to extract facial features.</li>
+                    <li><strong>Character Prediction:</strong> Receive predictions about savory or unsavory traits based on the analyzed features.</li>
+                </ol>
+
+                <h2>Our Technology</h2>
+                <p>Utilizing state-of-the-art neural networks, our prediction model has been trained on a diverse set of facial images to ensure high accuracy and reliability.</p>
+
+                <h2>Privacy and Security</h2>
+                <p>Your privacy is our priority. Uploaded images are processed in real-time and are not stored on our servers.</p>
+
+                <h2>Disclaimer</h2>
+                <p>Predictions provided by our model are based on observed patterns and should not be used as definitive measures of a person's character. Use these predictions with caution and consider other factors.</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
