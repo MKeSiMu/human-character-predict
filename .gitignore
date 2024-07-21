@@ -263,3 +263,6 @@ pyrightconfig.json
 
 # Ignore uploads folder
 /static/uploads/
+
+# Ignore JetBrains IDE settings
+.idea/
