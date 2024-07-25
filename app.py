@@ -19,8 +19,6 @@ STATIC_FOLDER = "static"
 UPLOAD_FOLDER = os.path.join("static", "uploads")
 ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif"}
 
-hcp_model = tf.keras.models.load_model(STATIC_FOLDER + "/models/" + "save_at_30.h5")
-
 # Initialize Flask app
 app = Flask(__name__)
 app.secret_key = os.getenv("SECRET_KEY")
@@ -34,6 +32,29 @@ if not os.path.exists(app.config["UPLOAD_FOLDER"]):
 
 def allowed_file(filename):
     return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
+
+
+def combine_model_files(part_files, output_file):
+    with open(output_file, "wb") as out_file:
+        for part_file in part_files:
+            with open(part_file, "rb") as f:
+                out_file.write(f.read())
+
+
+# Ensure the model file exists & if not, combine split model's parts
+@app.before_request
+def prepare_model():
+    model_path = STATIC_FOLDER + "/models/" + "save_at_30.h5"
+    if not os.path.exists(model_path):
+        part_files = [
+            STATIC_FOLDER + "/models/" + "save_at_30.h5.part0",
+            STATIC_FOLDER + "/models/" + "save_at_30.h5.part1",
+            STATIC_FOLDER + "/models/" + "save_at_30.h5.part2"
+        ]
+        combine_model_files(part_files, model_path)
+
+    global hcp_model
+    hcp_model = tf.keras.models.load_model(STATIC_FOLDER + "/models/" + "save_at_30.h5")
 
 
 @app.route("/", methods=["GET", "POST"])
