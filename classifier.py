@@ -1,23 +1,52 @@
-from tensorflow.keras.preprocessing.image import load_img, img_to_array
 import numpy as np
+import tensorflow as tf
+from PIL import Image
+
+TARGET_SIZE = (156, 200)
 
 
-TARGET_SIZE = (200, 156)
-THRESHOLD = 0.5
+def load_and_preprocess_image(img_path, target_size):
+    # Load image
+    with Image.open(img_path).convert('RGB') as image:
+        # Resize image to the target size expected by the model
+        image = image.resize(target_size)
+        # Convert to numpy array and normalize
+        image_array = np.array(image) / 255.0
+        # Add batch dimension
+        processed_image = np.expand_dims(image_array, axis=0).astype(np.float32)
+    return processed_image
 
+def classifier(tflite_model_path, img_path):
+    # Load the TFLite model and allocate tensors
+    interpreter = tf.lite.Interpreter(model_path=tflite_model_path)
+    interpreter.allocate_tensors()
 
-def load_and_preprocess_image(img_path):
-    img = load_img(img_path, target_size=TARGET_SIZE)
-    img_array = img_to_array(img)
-    img_array = np.expand_dims(img_array, axis=0)
-    img_array /= 255.0
-    return img_array
+    # Get input details
+    input_details = interpreter.get_input_details()
+    output_details = interpreter.get_output_details()
 
+    # Print input details for debugging
+    print("Input details:", input_details)
 
-def classifier(model, img_path):
-    processed_image = load_and_preprocess_image(img_path)
+    # Get input shape and size
+    input_shape = input_details[0]['shape']
+    target_size = (input_shape[2], input_shape[1])  # Adjusted to match the expected shape
 
-    prediction = model.predict(processed_image)
+    # Preprocess the image to match the input shape
+    processed_image = load_and_preprocess_image(img_path, target_size)
+
+    # Print shapes for debugging
+    print("Expected input shape:", input_shape)
+    print("Processed image shape:", processed_image.shape)
+
+    # Set the tensor to point to the input data
+    interpreter.set_tensor(input_details[0]['index'], processed_image)
+
+    # Run the inference
+    interpreter.invoke()
+
+    # Get the prediction result
+    prediction = interpreter.get_tensor(output_details[0]['index'])
 
     predicted_prob = prediction[0][0] * 100
 

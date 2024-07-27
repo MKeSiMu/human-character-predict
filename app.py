@@ -1,4 +1,6 @@
 import os
+import psutil
+
 import tensorflow as tf
 from flask import (
     Flask,
@@ -34,27 +36,13 @@ def allowed_file(filename):
     return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
-def combine_model_files(part_files, output_file):
-    with open(output_file, "wb") as out_file:
-        for part_file in part_files:
-            with open(part_file, "rb") as f:
-                out_file.write(f.read())
-
-
-# Ensure the model file exists & if not, combine split model's parts
-@app.before_request
-def prepare_model():
-    model_path = STATIC_FOLDER + "/models/" + "save_at_30.h5"
-    if not os.path.exists(model_path):
-        part_files = [
-            STATIC_FOLDER + "/models/" + "save_at_30.h5.part0",
-            STATIC_FOLDER + "/models/" + "save_at_30.h5.part1",
-            STATIC_FOLDER + "/models/" + "save_at_30.h5.part2"
-        ]
-        combine_model_files(part_files, model_path)
-
-    global hcp_model
-    hcp_model = tf.keras.models.load_model(STATIC_FOLDER + "/models/" + "save_at_30.h5")
+# # Load the TensorFlow Lite model and allocate tensors
+# interpreter = tf.lite.Interpreter(model_path=STATIC_FOLDER + "/models/" + "model.tflite")
+# interpreter.allocate_tensors()
+#
+# # Get input and output tensors
+# input_details = interpreter.get_input_details()
+# output_details = interpreter.get_output_details()
 
 
 @app.route("/", methods=["GET", "POST"])
@@ -67,7 +55,7 @@ def upload_file():
         file = request.files["file"]
 
         if file.filename == "":
-            flash("No selected file, please select file")
+            flash("No selected file, please select a file")
             return redirect(request.url)
 
         if file and allowed_file(file.filename):
@@ -75,11 +63,37 @@ def upload_file():
             upload_image_path = os.path.join(app.config["UPLOAD_FOLDER"], filename)
             file.save(upload_image_path)
 
-            predicted_label = classifier(hcp_model, upload_image_path)
+            predicted_label = classifier(STATIC_FOLDER + "/models/" + "model.tflite", upload_image_path)
+
             return render_template(
                 "result.html", image=f"uploads/{filename}", prediction=predicted_label
             )
     return render_template("index.html")
+
+# @app.route("/", methods=["GET", "POST"])
+# def upload_file():
+#     if request.method == "POST":
+#
+#         if "file" not in request.files:
+#             flash("No file part")
+#             return redirect(request.url)
+#         file = request.files["file"]
+#
+#         if file.filename == "":
+#             flash("No selected file, please select file")
+#             return redirect(request.url)
+#
+#         if file and allowed_file(file.filename):
+#             filename = secure_filename(file.filename)
+#             upload_image_path = os.path.join(app.config["UPLOAD_FOLDER"], filename)
+#             file.save(upload_image_path)
+#
+#             predicted_label = classifier(hcp_model, upload_image_path)
+#
+#             return render_template(
+#                 "result.html", image=f"uploads/{filename}", prediction=predicted_label
+#             )
+#     return render_template("index.html")
 
 
 if __name__ == "__main__":
