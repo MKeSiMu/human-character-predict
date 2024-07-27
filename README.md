@@ -23,6 +23,6 @@ Predictions provided by our model are based on observed patterns and should not 
 
 ## Demo
 
-![Endpoints interface](demo_index_page.png)
+![Endpoints interface](static/images/demo_index_page.png)
 
-![Endpoints interface](demo_result_page.png)
+![Endpoints interface](static/images/demo_result_page.png)
