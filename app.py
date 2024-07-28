@@ -1,6 +1,4 @@
 import os
-
-import tensorflow as tf
 from flask import (
     Flask,
     flash,
@@ -35,15 +33,6 @@ def allowed_file(filename):
     return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
-# # Load the TensorFlow Lite model and allocate tensors
-# interpreter = tf.lite.Interpreter(model_path=STATIC_FOLDER + "/models/" + "model.tflite")
-# interpreter.allocate_tensors()
-#
-# # Get input and output tensors
-# input_details = interpreter.get_input_details()
-# output_details = interpreter.get_output_details()
-
-
 @app.route("/", methods=["GET", "POST"])
 def upload_file():
     if request.method == "POST":
@@ -68,31 +57,6 @@ def upload_file():
                 "result.html", image=f"uploads/{filename}", prediction=predicted_label
             )
     return render_template("index.html")
-
-# @app.route("/", methods=["GET", "POST"])
-# def upload_file():
-#     if request.method == "POST":
-#
-#         if "file" not in request.files:
-#             flash("No file part")
-#             return redirect(request.url)
-#         file = request.files["file"]
-#
-#         if file.filename == "":
-#             flash("No selected file, please select file")
-#             return redirect(request.url)
-#
-#         if file and allowed_file(file.filename):
-#             filename = secure_filename(file.filename)
-#             upload_image_path = os.path.join(app.config["UPLOAD_FOLDER"], filename)
-#             file.save(upload_image_path)
-#
-#             predicted_label = classifier(hcp_model, upload_image_path)
-#
-#             return render_template(
-#                 "result.html", image=f"uploads/{filename}", prediction=predicted_label
-#             )
-#     return render_template("index.html")
 
 
 if __name__ == "__main__":
