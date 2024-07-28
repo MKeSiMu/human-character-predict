@@ -23,6 +23,8 @@ Predictions provided by our model are based on observed patterns and should not 
 
 ## Demo
 
+[Link](https://human-character-predict.onrender.com/) to deployed project on render.com. Due to render.com free tier resources limitation, project using TensorFlow Lite model and different processing image approach(project placed on "develop2" branch). 
+
 ![Endpoints interface](static/images/demo_index_page.png)
 
 ![Endpoints interface](static/images/demo_result_page.png)
